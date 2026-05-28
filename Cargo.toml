@@ -1,0 +1,52 @@
+[package]
+name = "quire-wasm"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "WebAssembly bindings for quire-rs (render, parse, extract, validate) — powers spec-editor live preview."
+authors = ["Agent IX <kreneskyp@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/agent-ix/quire-wasm"
+
+[lib]
+name = "quire_wasm"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Path-pinned during the scaffold turn; switch to a published version
+# once quire-rs ships a release that no longer requires `python` feature
+# gating for the wasm build. The default feature set already excludes
+# pyo3 (see quire-rs Cargo.toml `default = []`), so the wasm cdylib
+# compiles without bringing in libpython.
+quire-rs = { path = "../quire-rs", version = ">=0.2.0", default-features = false }
+
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+js-sys = "0.3"
+console_error_panic_hook = { version = "0.1", optional = true }
+
+# Direct dep so we can enable the `wasm_js` feature for the wasm32 build
+# (transitively required by quire-rs → uuid v7 → getrandom 0.3 on wasm).
+# Matched against the version quire-rs resolves so cargo unifies.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }
+# `js` feature wires uuid's v7 RNG to the WebCrypto/Math.random path
+# (instead of the std-only default that fails to compile on wasm32).
+uuid = { version = "1", features = ["v7", "js"] }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+serde-wasm-bindgen = "0.6"
+serde_json = "1"
+
+[features]
+default = ["panic-hook"]
+panic-hook = ["dep:console_error_panic_hook"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = "s"

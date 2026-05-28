@@ -1,0 +1,31 @@
+{
+  "name": "@agent-ix/quire-wasm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebAssembly bindings for quire-rs — powers spec-editor live preview.",
+  "type": "module",
+  "main": "pkg/quire_wasm.js",
+  "module": "pkg/quire_wasm.js",
+  "types": "pkg/quire_wasm.d.ts",
+  "exports": {
+    ".": {
+      "types": "./pkg/quire_wasm.d.ts",
+      "import": "./pkg/quire_wasm.js"
+    }
+  },
+  "files": [
+    "pkg/"
+  ],
+  "scripts": {
+    "build": "wasm-pack build --target web --release",
+    "test": "wasm-pack test --node"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agent-ix/quire-wasm.git"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+# Required so the `getrandom` crate (transitively pulled in by `uuid`
+# with the `v7` feature in quire-rs) selects its WASM/JS backend when
+# we compile this crate's cdylib for wasm32-unknown-unknown. Without
+# the cfg flag, getrandom 0.3+ errors out at compile time on wasm32.
+#
+# Mirrors https://docs.rs/getrandom/0.3/getrandom/#webassembly-support
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']

@@ -1,0 +1,7 @@
+edition = "2021"
+max_width = 100
+use_small_heuristics = "Default"
+# `imports_granularity` and `group_imports` require nightly rustfmt;
+# kept in the cookiecutter for repos that have a nightly CI lane, but
+# omitted here to keep `make fmt-check` stable-only.
+

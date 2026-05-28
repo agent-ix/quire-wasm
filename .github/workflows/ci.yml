@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: Rust Checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the sibling `quire-rs` repo for the path-pinned dep
+          # during the scaffold turn. CI clones it explicitly below.
+          path: quire-wasm
+
+      - name: Checkout sibling quire-rs (for path dep)
+        uses: actions/checkout@v4
+        with:
+          repository: agent-ix/quire-rs
+          path: quire-rs
+
+      - name: Checkout sibling spec-artifacts-iso (for parity test module)
+        uses: actions/checkout@v4
+        with:
+          repository: agent-ix/spec-artifacts-iso
+          path: spec-artifacts-iso
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: quire-wasm
+
+      - name: Install wasm-pack
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
+      - name: Format
+        working-directory: quire-wasm
+        run: cargo fmt --all -- --check
+
+      - name: Lint
+        working-directory: quire-wasm
+        run: cargo clippy --all-targets --target wasm32-unknown-unknown -- -D warnings
+
+      - name: Test (wasm-pack --node)
+        working-directory: quire-wasm
+        env:
+          QUIRE_WASM_TEST_MODULE_ROOT: ${{ github.workspace }}/spec-artifacts-iso/spec_artifacts_iso
+        run: wasm-pack test --node
+
+      - name: Unsafe audit
+        working-directory: quire-wasm
+        run: bash scripts/check_unsafe_comments.sh
+
+  licenses:
+    name: License Check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: quire-wasm
+      - uses: actions/checkout@v4
+        with:
+          repository: agent-ix/quire-rs
+          path: quire-rs
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: quire-wasm
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: cargo deny check licenses
+        working-directory: quire-wasm
+        run: cargo deny check licenses
