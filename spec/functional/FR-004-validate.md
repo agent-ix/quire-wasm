@@ -18,6 +18,7 @@ archetype's compiled JSON schema against `data` and either returns
 |----|----------|
 | FR-004-AC-1 | A schema-conforming `data` resolves with no thrown error. |
 | FR-004-AC-2 | A schema-violating `data` throws `JsError` whose message contains the violation pointer. |
+| FR-004-AC-3 | `validateFromBlob(archetype, moduleBlob, data)` rejects schema-violating data identically to `validate_archetype(archetype, root, data)` (FR-001 amendment, T-008). |
 
 ## Relationships
 

@@ -9,42 +9,50 @@
 | T-005 | Criterion bench + baseline + CI band (NFR-001) | 3 | TODO |
 | T-006 | GitHub Packages publish workflow (tag-driven) | 4 | TODO |
 | T-007 | Drop `private: true`, bump to v0.2.0 | 4 | TODO |
-| T-008 | In-memory module-blob loader (cross-repo: quire-rs + quire-wasm) | 5 | TODO |
-| T-009 | spec-editor swap: nunjucks → @agent-ix/quire-wasm (in spec-editor repo) | 5 | TODO |
+| T-008 | In-memory module-blob loader (cross-repo: quire-rs + quire-wasm) | 5 | DONE |
+| T-009 | spec-editor swap: nunjucks → @agent-ix/quire-wasm (in spec-editor repo) | 5 | FOLLOW-UP |
 
-## Known blocker — jsonschema 0.18 on wasm32
+## RESOLVED — jsonschema 0.18 on wasm32 (T-008)
 
-`quire-rs` depends on `jsonschema = "0.18"` with `resolve-file`, which
-calls `url::Url::to_file_path` — a method `url` only exposes under
-`cfg(any(unix, windows))`. On `wasm32-unknown-unknown` the trait method
-is missing and `cargo build --target wasm32-unknown-unknown` fails
-inside `jsonschema`.
+Resolved in `quire-rs v0.3.1` via option (1) above: a `wasm` Cargo
+feature that drops the `jsonschema/resolve-file` activation. quire-wasm
+now depends on `quire-rs = { features = ["wasm"], default-features = false }`
+and `wasm-pack build --target web --release` succeeds. `wasm-pack test
+--node` runs all four `render_parity.rs` tests, including the
+previously-blocked StR-001-AC-1 parity test (the test bundles the ISO
+module via `include_str!` and renders through `renderFromBlob`).
 
-Workarounds (any one unblocks T-002's wasm-pack lane):
+## In-memory module loader (T-008) — DONE
 
-1. Upstream a `wasm` feature in `quire-rs` that drops the
-   `resolve-file` activation of `jsonschema` (and disables FS-backed
-   `$ref` resolution on wasm).
-2. Wait on `jsonschema 0.20+` which restructures the resolver.
-3. Vendor a minimal validator wrapper inside `quire-wasm` that skips
-   `$ref` resolution.
+Upstream API landed as `quire_rs::Registry::from_inline_parts(manifest_yaml, schemas, templates)` in v0.3.1 (FR-013 wasm amendment). quire-wasm exposes:
 
-Until then `cargo check --lib` passes on the **native** target (proving
-the binding code compiles and links against `quire-rs`), and
-`wasm-pack test --node` is gated behind T-008's prereq.
+- `renderFromBlob(archetype, moduleBlob, data) -> markdown`
+- `extractFromBlob(archetype, moduleBlob, doc) -> { records, diagnostics }`
+- `validateFromBlob(archetype, moduleBlob, data) -> undefined | throw`
 
-## In-memory module loader (T-008) — design note
+`moduleBlob` JS shape:
 
-The scaffold turn (T-001..002) ships a WASM whose `moduleRoot` is a
-filesystem path. This works for Node consumers (real fs) and CI parity
-tests, but blocks a pure-browser build under `--target web`.
+```js
+{
+  manifest:  "<raw manifest.yaml>",
+  schemas:   { "schemas/fr-frontmatter.schema.json": "<json>", ... },
+  templates: { "templates/fr.md.j2": "<jinja>", ... }
+}
+```
 
-T-008 will upstream a `Registry::from_blob(json: &Value) -> Registry`
-constructor in `quire-rs` that takes the manifest + schemas + templates
-inline, bypassing the `loader::*` filesystem walk. quire-wasm then
-exposes `renderFromBlob`, `extractFromBlob`, `validateFromBlob` that
-match the FS-shape ADR (a) in `README.md`.
+The original `render` / `extract` / `validate_archetype` path-rooted
+exports remain for `--target nodejs` consumers that already hold the
+module on disk.
 
-Rationale: the spec-editor already holds the active module in memory,
-so a JSON blob is the natural interchange. The current path-string
-shape stays for Node tooling that already lives on disk.
+## spec-editor swap (T-009) — follow-up
+
+Filed as a follow-up rather than landing here: the swap touches the
+spec-editor app (separate repo) and benefits from coordination with the
+editor team. The exact import-line change is:
+
+```diff
+- import nunjucks from "nunjucks";
++ import * as quire from "@agent-ix/quire-wasm";
+```
+
+…with the live-preview render switching from `nunjucks.renderString(template, ctx)` to `quire.renderFromBlob(archetype, moduleBlob, ctx)`, where `moduleBlob` is built once at editor startup from the active module's `manifest.yaml`, `schemas/*.json`, and `templates/*.j2`.
