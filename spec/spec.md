@@ -2,23 +2,26 @@
 
 ## Purpose
 
-Expose `quire-rs` (render, parseDocument, extract, validate) as a
-WebAssembly module so that `spec-editor` and other browser/Node
-consumers render spec artifacts using the **canonical** pipeline rather
-than a parallel JavaScript template engine (`nunjucks`).
+Expose `quire-rs` (parseDocument, extract, validate) as a WebAssembly
+module so that `spec-editor` and other browser/Node consumers parse and
+validate spec artifacts using the **canonical** pipeline rather than a
+parallel JavaScript implementation.
 
-Eliminating `nunjucks` removes a class of preview-vs-published drift
-where the editor renders one document but `quire-cli` (and the Python
-reference renderer) produce another.
+> **CR-001 (RETIRED render surface).** The render/templating feature was
+> removed from `quire-rs` (commit `e0811a8`); `from_inline_parts` no
+> longer accepts a templates map. The `render`/`renderFromBlob` exports
+> and the render-parity tests are retired. FR-001 is RETIRED (see
+> `spec/functional/FR-001-render.md`); the module blob is now
+> `{ manifest, schemas }`. The parse/extract/validate surface is
+> unaffected.
 
 ## Scope
 
 In scope:
 
-- WASM cdylib wrapping the four `quire-rs` public functions
+- WASM cdylib wrapping the `quire-rs` parse/extract/validate functions
 - npm package `@agent-ix/quire-wasm` (private to GitHub Packages at v0)
-- Parity test: WASM render output == `quire-rs` native for ISO archetypes
-- Per-keystroke render budget within a debounce window (NFR-001)
+- Parity test: WASM extract/validate == `quire-rs` native for ISO archetypes
 
 Out of scope (this repo):
 

@@ -1,11 +1,10 @@
 //! Native (non-wasm) smoke test: proves the binding glue compiles and
-//! the underlying quire-rs render pipeline returns sensible output
-//! against the in-repo `spec-artifacts-iso` module.
+//! the underlying quire-rs parse/validate pipeline returns sensible
+//! output against the in-repo `spec-artifacts-iso` module.
 //!
-//! The wasm-pack lane (tests/render_parity.rs) is the contractual
-//! parity test against StR-001 once the `jsonschema`-on-wasm32
-//! blocker (plan T-008 prereq) is resolved. Until then this native
-//! lane exercises the same code paths under `cargo test`.
+//! The render/templating feature was removed from quire-rs (commit
+//! `e0811a8`); this lane exercises parseDocument and schema validation
+//! under `cargo test`.
 
 #![cfg(not(target_arch = "wasm32"))]
 
@@ -28,7 +27,7 @@ fn parse_document_returns_sections() {
 }
 
 #[test]
-fn render_fr_smoke_via_quire_rs() {
+fn validate_fr_smoke_via_quire_rs() {
     // Only run if the sibling module is checked out alongside this
     // repo. CI's setup explicitly checks both out; locally this is
     // best-effort.
@@ -38,6 +37,7 @@ fn render_fr_smoke_via_quire_rs() {
         return;
     }
     let registry = quire_rs::Registry::load_module(root.as_path()).expect("registry load");
+    let archetype = registry.archetype("FR").expect("FR archetype present");
     let data = json!({
         "id": "FR-099",
         "title": "Performance benchmark sample",
@@ -52,6 +52,5 @@ fn render_fr_smoke_via_quire_rs() {
             }
         ]
     });
-    let out = quire_rs::render_by_name(&registry, "FR", &data).expect("render");
-    assert!(out.markdown.contains("FR-099"));
+    quire_rs::validate(archetype, &data).expect("valid FR should pass schema validation");
 }

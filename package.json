@@ -2,7 +2,7 @@
   "name": "@agent-ix/quire-wasm",
   "version": "0.1.0",
   "private": true,
-  "description": "WebAssembly bindings for quire-rs — powers spec-editor live preview.",
+  "description": "WebAssembly bindings for quire-rs (parse, extract, validate) — powers spec-editor live preview.",
   "type": "module",
   "main": "pkg/quire_wasm.js",
   "module": "pkg/quire_wasm.js",

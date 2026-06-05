@@ -1,21 +1,23 @@
 //! WebAssembly bindings for quire-rs.
 //!
-//! Exposes the same render/parseDocument/extract/validate surface as the
-//! Python `quire` module so spec-editor's live preview can call into the
-//! same engine that powers `quire-cli` and the Python reference
-//! renderer (no `nunjucks` runtime divergence).
+//! Exposes the parseDocument/extract/validate surface of the canonical
+//! `quire-rs` engine so spec-editor's live preview can call into the
+//! same engine that powers `quire-cli` and the Python reference parser.
+//!
+//! The render/templating feature was removed from `quire-rs`
+//! (commit `e0811a8`); there is no `render`/`renderFromBlob` export.
 //!
 //! ## Two shapes
 //!
-//! 1. **Module-blob** (`renderFromBlob`, `extractFromBlob`,
-//!    `validateFromBlob`): accept a single `moduleBlob` JS object of
-//!    shape `{ manifest: string, schemas: { "<ref>": string },
-//!    templates: { "<ref>": string } }` — the filesystem-free path used
-//!    by `--target web`. The host bundles the module's files into the
-//!    blob once, then drives render/extract/validate inline.
+//! 1. **Module-blob** (`extractFromBlob`, `validateFromBlob`): accept a
+//!    single `moduleBlob` JS object of shape
+//!    `{ manifest: string, schemas: { "<ref>": string } }` — the
+//!    filesystem-free path used by `--target web`. The host bundles the
+//!    module's files into the blob once, then drives extract/validate
+//!    inline.
 //!
-//! 2. **Filesystem-rooted** (`render`, `extract`, `validateArchetype`):
-//!    accept a `moduleRoot` path string. These keep working under
+//! 2. **Filesystem-rooted** (`extract`, `validateArchetype`): accept a
+//!    `moduleRoot` path string. These keep working under
 //!    `--target nodejs` for tools that already live on disk.
 //!
 //! `parseDocument` is pure string-in / JSON-out and identical in both
@@ -27,8 +29,7 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use quire_rs::{
-    extract as rs_extract, parse_document as rs_parse_document, render_by_name, validate,
-    ExtractionDsl, Registry,
+    extract as rs_extract, parse_document as rs_parse_document, validate, ExtractionDsl, Registry,
 };
 
 /// Install a panic hook that surfaces Rust panics as console.error in JS.
@@ -64,49 +65,31 @@ fn value_to_js(value: &Value) -> Result<JsValue, JsError> {
         .map_err(|e| JsError::new(&format!("serialization failed: {e}")))
 }
 
-/// Deserialize a JS `moduleBlob` object into the three inputs
-/// `Registry::from_inline_parts` expects: the raw manifest bytes plus
-/// `BTreeMap`s of relative-ref → source for schemas and templates.
-#[allow(clippy::type_complexity)]
-fn parts_from_blob(
-    blob: JsValue,
-) -> Result<(Vec<u8>, BTreeMap<String, String>, BTreeMap<String, String>), JsError> {
+/// Deserialize a JS `moduleBlob` object into the two inputs
+/// `Registry::from_inline_parts` expects: the raw manifest bytes plus a
+/// `BTreeMap` of relative-ref → source for schemas. (The render feature
+/// was removed from quire-rs, so there is no templates map.)
+fn parts_from_blob(blob: JsValue) -> Result<(Vec<u8>, BTreeMap<String, String>), JsError> {
     #[derive(serde::Deserialize)]
     struct Blob {
         manifest: String,
         #[serde(default)]
         schemas: BTreeMap<String, String>,
-        #[serde(default)]
-        templates: BTreeMap<String, String>,
     }
     let parsed: Blob = serde_wasm_bindgen::from_value(blob)
         .map_err(|e| JsError::new(&format!("invalid moduleBlob: {e}")))?;
-    Ok((
-        parsed.manifest.into_bytes(),
-        parsed.schemas,
-        parsed.templates,
-    ))
+    Ok((parsed.manifest.into_bytes(), parsed.schemas))
 }
 
 fn registry_from_blob(blob: JsValue) -> Result<Registry, JsError> {
-    let (manifest, schemas, templates) = parts_from_blob(blob)?;
-    Registry::from_inline_parts(&manifest, &schemas, &templates)
+    let (manifest, schemas) = parts_from_blob(blob)?;
+    Registry::from_inline_parts(&manifest, &schemas)
         .map_err(|e| JsError::new(&format!("registry inline load failed: {e:?}")))
 }
 
 // ============================================================================
 // Filesystem-rooted surface (Node-target convenience).
 // ============================================================================
-
-/// Render `archetype` from the module rooted at `moduleRoot` against
-/// `data`. Returns the rendered markdown string.
-///
-/// Mirrors `quire render <archetype> --module <root> --data <ctx>`.
-#[wasm_bindgen]
-pub fn render(archetype: &str, module_root: &str, data: JsValue) -> Result<String, JsError> {
-    let registry = registry_from_module(module_root)?;
-    render_with_registry(&registry, archetype, data)
-}
 
 /// Parse a markdown document into the `QuireDocument` JSON shape.
 /// No filesystem access; pure string-in/JSON-out (live-preview hot path).
@@ -142,28 +125,15 @@ pub fn validate_archetype(
 // Module-blob surface (browser / --target web).
 // ============================================================================
 
-/// Render from an in-memory `moduleBlob` (no filesystem access).
+/// Extract from an in-memory module blob.
 ///
 /// `moduleBlob` shape:
 /// ```json
 /// {
 ///   "manifest": "name: spec_artifacts_iso\nartifact_types:\n- ...",
-///   "schemas":  { "schemas/FR-frontmatter.schema.json": "{...}" },
-///   "templates":{ "templates/FR.md.j2": "..." }
+///   "schemas":  { "schemas/FR-frontmatter.schema.json": "{...}" }
 /// }
 /// ```
-#[wasm_bindgen(js_name = renderFromBlob)]
-pub fn render_from_blob(
-    archetype: &str,
-    module_blob: JsValue,
-    data: JsValue,
-) -> Result<String, JsError> {
-    let registry = registry_from_blob(module_blob)?;
-    render_with_registry(&registry, archetype, data)
-}
-
-/// Extract from an in-memory module blob. See [`render_from_blob`] for
-/// the blob shape.
 #[wasm_bindgen(js_name = extractFromBlob)]
 pub fn extract_from_blob(
     archetype: &str,
@@ -175,7 +145,7 @@ pub fn extract_from_blob(
 }
 
 /// Validate `data` against an archetype defined inside `moduleBlob`.
-/// See [`render_from_blob`] for the blob shape.
+/// See [`extract_from_blob`] for the blob shape.
 #[wasm_bindgen(js_name = validateFromBlob)]
 pub fn validate_from_blob(
     archetype: &str,
@@ -189,17 +159,6 @@ pub fn validate_from_blob(
 // ============================================================================
 // Shared adapters
 // ============================================================================
-
-fn render_with_registry(
-    registry: &Registry,
-    archetype: &str,
-    data: JsValue,
-) -> Result<String, JsError> {
-    let value = data_from_js(data)?;
-    let out = render_by_name(registry, archetype, &value)
-        .map_err(|e| JsError::new(&format!("render failed: {e:?}")))?;
-    Ok(out.markdown)
-}
 
 fn extract_with_registry(
     registry: &Registry,

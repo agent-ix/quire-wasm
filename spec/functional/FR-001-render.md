@@ -6,6 +6,16 @@ artifact_type: FR
 
 # FR-001 — render(archetype, moduleRoot, data) → markdown
 
+> **RETIRED (CR-001).** The render/templating feature was removed from
+> `quire-rs` (commit `e0811a8`): `render_by_name` is gone and
+> `Registry::from_inline_parts(manifest, schemas)` no longer takes a
+> templates map. The `render` and `renderFromBlob` WASM exports, the
+> `templates` field of `moduleBlob`, and the render-parity tests
+> (`tests/render_parity.rs`) are removed. The surviving surface is
+> parseDocument (FR-002), extract / extractFromBlob (FR-003), and
+> validate / validateFromBlob (FR-004). The text below is retained for
+> historical context only and is no longer normative.
+
 ## Statement
 
 The WASM module SHALL export a function `render` that takes an
