@@ -14,12 +14,11 @@ path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# Path-pinned during the scaffold turn; switch to a published version
-# once quire-rs ships a release that no longer requires `python` feature
-# gating for the wasm build. The default feature set already excludes
+# Pinned to a published quire-rs git tag so cargo fetches it directly
+# (no sibling checkout in CI). The default feature set already excludes
 # pyo3 (see quire-rs Cargo.toml `default = []`), so the wasm cdylib
 # compiles without bringing in libpython.
-quire-rs = { path = "../quire-rs", version = ">=0.3.1", default-features = false, features = ["wasm"] }
+quire-rs = { git = "https://github.com/agent-ix/quire-rs", tag = "v0.3.6", default-features = false, features = ["wasm"] }
 
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"

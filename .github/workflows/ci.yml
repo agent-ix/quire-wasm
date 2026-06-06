@@ -11,23 +11,21 @@ jobs:
   rust:
     name: Rust Checks
     runs-on: ubuntu-24.04
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
       - uses: actions/checkout@v4
         with:
-          # Need the sibling `quire-rs` repo for the path-pinned dep
-          # during the scaffold turn. CI clones it explicitly below.
           path: quire-wasm
 
-      - name: Checkout sibling quire-rs (for path dep)
-        uses: actions/checkout@v4
-        with:
-          repository: agent-ix/quire-rs
-          path: quire-rs
+      - name: Authenticate cargo git fetch (private quire-rs)
+        run: git config --global url."https://x-access-token:${{ secrets.REGISTRY_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Checkout sibling spec-artifacts-iso (for parity test module)
         uses: actions/checkout@v4
         with:
           repository: agent-ix/spec-artifacts-iso
+          token: ${{ secrets.REGISTRY_TOKEN }}
           path: spec-artifacts-iso
 
       - name: Install Rust toolchain
@@ -67,14 +65,14 @@ jobs:
   licenses:
     name: License Check
     runs-on: ubuntu-24.04
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
       - uses: actions/checkout@v4
         with:
           path: quire-wasm
-      - uses: actions/checkout@v4
-        with:
-          repository: agent-ix/quire-rs
-          path: quire-rs
+      - name: Authenticate cargo git fetch (private quire-rs)
+        run: git config --global url."https://x-access-token:${{ secrets.REGISTRY_TOKEN }}@github.com/".insteadOf "https://github.com/"
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo artifacts
