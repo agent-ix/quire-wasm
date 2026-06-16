@@ -41,7 +41,7 @@ fn validate_fr_smoke_via_quire_rs() {
     let data = json!({
         "id": "FR-099",
         "title": "Performance benchmark sample",
-        "artifact_type": "FR",
+        "type": "FR",
         "object": "core/scheduler",
         "description": "Auto-generated benchmark target.",
         "relationships": [

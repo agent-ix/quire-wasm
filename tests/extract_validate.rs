@@ -73,7 +73,7 @@ fn validate_from_blob_accepts_valid_fr() {
     let data = json!({
         "id": "FR-099",
         "title": "Performance benchmark sample",
-        "artifact_type": "FR",
+        "type": "FR",
         "object": "core/scheduler",
         "description": "Auto-generated benchmark target.",
         "relationships": [
