@@ -1,7 +1,7 @@
 ---
 id: FR-004
 title: "Exported validate_archetype(archetype, moduleRoot, data) → ok | throw"
-artifact_type: FR
+type: FR
 ---
 
 # FR-004 — validate_archetype(archetype, moduleRoot, data)

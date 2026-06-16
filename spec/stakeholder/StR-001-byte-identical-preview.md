@@ -1,7 +1,7 @@
 ---
 id: StR-001
 title: "Editor preview is byte-identical to quire-cli render"
-artifact_type: StR
+type: StR
 ---
 
 # StR-001 — Editor preview is byte-identical to quire-cli render

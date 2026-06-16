@@ -1,7 +1,7 @@
 ---
 id: NFR-001
 title: "Per-keystroke render fits within editor debounce window"
-artifact_type: NFR
+type: NFR
 ---
 
 # NFR-001 — Per-keystroke render fits within editor debounce window

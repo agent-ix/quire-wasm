@@ -1,7 +1,7 @@
 ---
 id: FR-001
 title: "Exported render(archetype, moduleRoot, data) → markdown"
-artifact_type: FR
+type: FR
 ---
 
 # FR-001 — render(archetype, moduleRoot, data) → markdown

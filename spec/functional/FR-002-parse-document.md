@@ -1,7 +1,7 @@
 ---
 id: FR-002
 title: "Exported parseDocument(text) → JSON"
-artifact_type: FR
+type: FR
 ---
 
 # FR-002 — parseDocument(text) → JSON

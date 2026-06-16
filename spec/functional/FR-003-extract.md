@@ -1,7 +1,7 @@
 ---
 id: FR-003
 title: "Exported extract(archetype, moduleRoot, doc) → records"
-artifact_type: FR
+type: FR
 ---
 
 # FR-003 — extract(archetype, moduleRoot, doc) → records
