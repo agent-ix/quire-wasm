@@ -1,3 +1,9 @@
+---
+id: TM-001
+title: "quire-wasm Test Matrix"
+type: TestMatrix
+---
+
 # Test Matrix
 
 100% AC → TC coverage. `grep` audit: every AC ID below MUST appear in

@@ -1,3 +1,9 @@
+---
+id: SPEC-001
+title: "quire-wasm — Specification"
+type: Spec
+---
+
 # quire-wasm — Specification
 
 ## Purpose

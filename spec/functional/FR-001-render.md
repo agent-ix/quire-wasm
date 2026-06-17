@@ -16,7 +16,7 @@ type: FR
 > validate / validateFromBlob (FR-004). The text below is retained for
 > historical context only and is no longer normative.
 
-## Statement
+## Description
 
 The WASM module SHALL export a function `render` that takes an
 archetype name, a module-root path string, and a JS data object, and
@@ -40,14 +40,14 @@ The WASM module SHALL additionally export `renderFromBlob(archetype, moduleBlob,
 
 ## Acceptance Criteria
 
-| ID | Criteria |
-|----|----------|
-| FR-001-AC-1 | `render("FR", root, ctx)` returns a non-empty string containing every required frontmatter field from `ctx`. |
-| FR-001-AC-2 | Invalid `archetype` throws `JsError` mentioning the archetype name. |
-| FR-001-AC-3 | Output matches `quire-rs::render_by_name(...).markdown` byte-for-byte (StR-001-AC-1). |
-| FR-001-AC-4 | `renderFromBlob("FR", moduleBlob, ctx)` returns the same string as `render("FR", root, ctx)` when `moduleBlob` is constructed from the same module files; verified under `wasm-pack test --node`. |
+| ID | Criteria | Verification |
+|----|----------|--------------|
+| FR-001-AC-1 | `render("FR", root, ctx)` returns a non-empty string containing every required frontmatter field from `ctx`. | Test |
+| FR-001-AC-2 | Invalid `archetype` throws `JsError` mentioning the archetype name. | Test |
+| FR-001-AC-3 | Output matches `quire-rs::render_by_name(...).markdown` byte-for-byte (StR-001-AC-1). | Test |
+| FR-001-AC-4 | `renderFromBlob("FR", moduleBlob, ctx)` returns the same string as `render("FR", root, ctx)` when `moduleBlob` is constructed from the same module files; verified under `wasm-pack test --node`. | Test |
 
-## Relationships
+## Dependencies
 
-- implements: `quire-wasm/StR-001`
-- wraps: `quire-rs/FR-001`
+- **Upstream**: `quire-wasm/StR-001` (implements), `quire-rs/FR-001` (wraps the retired native render)
+- **Downstream**: none — surface RETIRED (CR-001), no longer normative

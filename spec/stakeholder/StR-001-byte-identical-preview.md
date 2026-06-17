@@ -6,16 +6,22 @@ type: StR
 
 # StR-001 — Editor preview is byte-identical to quire-cli render
 
-## Statement
+## Stakeholder Need
 
 Spec-editor's live preview MUST produce the same rendered markdown as
 the `quire render` CLI for the same archetype and the same context,
-byte-for-byte. The current `nunjucks`-based preview produces divergent
-output for non-trivial templates (whitespace, conditional blocks,
-custom filters), which silently misleads authors about what their
-published artifact will look like.
+byte-for-byte.
 
-## Acceptance Criteria
+## Rationale
+
+The current `nunjucks`-based preview produces divergent output for
+non-trivial templates (whitespace, conditional blocks, custom filters),
+which silently misleads authors about what their published artifact will
+look like. Driving the preview through the canonical `quire-rs` pipeline
+compiled to WASM removes the parallel JavaScript implementation and
+guarantees the preview matches the published artifact.
+
+## Validation Criteria
 
 | ID | Criteria |
 |----|----------|

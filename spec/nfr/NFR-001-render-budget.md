@@ -15,12 +15,15 @@ the WASM ABI boundary. This is the per-frame budget that lets
 spec-editor keep its 60 fps debounce window without dropping frames
 during typing.
 
-## Acceptance Criteria
+## Measurement and Evaluation
 
-| ID | Criteria |
-|----|----------|
-| NFR-001-AC-1 | A criterion-style bench (added in plan/tasks/T-005) reports p95 ≤ 16 ms across 1000 runs of `render("FR", ...)`. |
-| NFR-001-AC-2 | Regression band of +10% over a stored baseline; CI lane gates on the band (lands with T-005). |
+The render budget is evaluated by benchmarking a single `render` call at
+the WASM ABI boundary against the per-frame budget below.
+
+| Metric | Target | Threshold | Method |
+|--------|--------|-----------|--------|
+| Per-call render latency (p95) | ≤ 16 ms | 16 ms hard ceiling across 1000 runs of `render("FR", ...)` | Criterion-style bench (plan/tasks/T-005) under `wasm-pack test --node --release` |
+| Latency regression vs baseline | within stored baseline | +10% band over `spec/assets/perf-baseline.json` | CI lane gates on the regression band (lands with T-005) |
 
 ## Verification
 
