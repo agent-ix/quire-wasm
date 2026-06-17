@@ -16,8 +16,8 @@ parallel JavaScript implementation.
 > **CR-001 (RETIRED render surface).** The render/templating feature was
 > removed from `quire-rs` (commit `e0811a8`); `from_inline_parts` no
 > longer accepts a templates map. The `render`/`renderFromBlob` exports
-> and the render-parity tests are retired. FR-001 is RETIRED (see
-> `spec/functional/FR-001-render.md`); the module blob is now
+> and the render-parity tests are retired. [FR-001](./functional/FR-001-render.md) is RETIRED (see
+> [FR-001](./functional/FR-001-render.md)); the module blob is now
 > `{ manifest, schemas }`. The parse/extract/validate surface is
 > unaffected.
 

@@ -23,5 +23,5 @@ per-keystroke structural validation.
 
 ## Dependencies
 
-- **Upstream**: `quire-wasm/StR-001` (implements), `quire-rs/FR-005` (wraps)
+- **Upstream**: [StR-001](../stakeholder/StR-001-byte-identical-preview.md) (implements), `quire-rs/FR-005` (wraps)
 - **Downstream**: `tests/extract_validate.rs` parity coverage

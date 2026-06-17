@@ -12,8 +12,8 @@ type: FR
 > templates map. The `render` and `renderFromBlob` WASM exports, the
 > `templates` field of `moduleBlob`, and the render-parity tests
 > (`tests/render_parity.rs`) are removed. The surviving surface is
-> parseDocument (FR-002), extract / extractFromBlob (FR-003), and
-> validate / validateFromBlob (FR-004). The text below is retained for
+> parseDocument ([FR-002](./FR-002-parse-document.md)), extract / extractFromBlob ([FR-003](./FR-003-extract.md)), and
+> validate / validateFromBlob ([FR-004](./FR-004-validate.md)). The text below is retained for
 > historical context only and is no longer normative.
 
 ## Description
@@ -44,10 +44,10 @@ The WASM module SHALL additionally export `renderFromBlob(archetype, moduleBlob,
 |----|----------|--------------|
 | FR-001-AC-1 | `render("FR", root, ctx)` returns a non-empty string containing every required frontmatter field from `ctx`. | Test |
 | FR-001-AC-2 | Invalid `archetype` throws `JsError` mentioning the archetype name. | Test |
-| FR-001-AC-3 | Output matches `quire-rs::render_by_name(...).markdown` byte-for-byte (StR-001-AC-1). | Test |
+| FR-001-AC-3 | Output matches `quire-rs::render_by_name(...).markdown` byte-for-byte ([StR-001-AC-1](../stakeholder/StR-001-byte-identical-preview.md)). | Test |
 | FR-001-AC-4 | `renderFromBlob("FR", moduleBlob, ctx)` returns the same string as `render("FR", root, ctx)` when `moduleBlob` is constructed from the same module files; verified under `wasm-pack test --node`. | Test |
 
 ## Dependencies
 
-- **Upstream**: `quire-wasm/StR-001` (implements), `quire-rs/FR-001` (wraps the retired native render)
+- **Upstream**: [StR-001](../stakeholder/StR-001-byte-identical-preview.md) (implements), `quire-rs/FR-001` (wraps the retired native render)
 - **Downstream**: none — surface RETIRED (CR-001), no longer normative
