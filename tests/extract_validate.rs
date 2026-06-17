@@ -24,10 +24,6 @@ const ISO_MANIFEST: &str =
     include_str!("../../spec-artifacts-iso/spec_artifacts_iso/manifest.yaml");
 const ISO_FR_SCHEMA: &str =
     include_str!("../../spec-artifacts-iso/spec_artifacts_iso/schemas/fr-frontmatter.schema.json");
-const ISO_AC_SCHEMA: &str =
-    include_str!("../../spec-artifacts-iso/spec_artifacts_iso/schemas/ac-frontmatter.schema.json");
-const ISO_CON_SCHEMA: &str =
-    include_str!("../../spec-artifacts-iso/spec_artifacts_iso/schemas/con-frontmatter.schema.json");
 const ISO_IT_SCHEMA: &str =
     include_str!("../../spec-artifacts-iso/spec_artifacts_iso/schemas/it-frontmatter.schema.json");
 const ISO_NFR_SCHEMA: &str =
@@ -46,8 +42,6 @@ fn iso_blob() -> JsValue {
         "manifest": ISO_MANIFEST,
         "schemas": {
             "schemas/fr-frontmatter.schema.json": ISO_FR_SCHEMA,
-            "schemas/ac-frontmatter.schema.json": ISO_AC_SCHEMA,
-            "schemas/con-frontmatter.schema.json": ISO_CON_SCHEMA,
             "schemas/it-frontmatter.schema.json": ISO_IT_SCHEMA,
             "schemas/nfr-frontmatter.schema.json": ISO_NFR_SCHEMA,
             "schemas/str-frontmatter.schema.json": ISO_STR_SCHEMA,
