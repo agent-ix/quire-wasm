@@ -148,7 +148,9 @@ jobs:
       # Public npm via OIDC: route @agent-ix at registry.npmjs.org with no auth
       # token; `npm publish` performs the tokenless OIDC token exchange.
       - name: Configure npm for public npm
-        run: printf 'registry=https://registry.npmjs.org/\n@agent-ix:registry=https://registry.npmjs.org/\n' > "$HOME/.npmrc"
+        # provenance=false: this repo is private, where provenance attestations
+        # are unsupported; disable so OIDC publish isn't tripped up by it.
+        run: printf 'registry=https://registry.npmjs.org/\n@agent-ix:registry=https://registry.npmjs.org/\nprovenance=false\n' > "$HOME/.npmrc"
 
       - name: Publish to public npm
         working-directory: quire-wasm
