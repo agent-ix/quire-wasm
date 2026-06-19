@@ -61,7 +61,7 @@ validateFromBlob("FR", moduleBlob, { id: "FR-001", /* ... */ });
 ## Install
 
 ```bash
-npm install @agent-ix/quire-wasm   # from GitHub Packages
+npm install @agent-ix/quire-wasm
 ```
 
 ## Build
