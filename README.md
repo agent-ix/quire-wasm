@@ -1,10 +1,10 @@
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/6qsdhSPE)
-
 <p align="center">
   <img src="logo.png" alt="Quire" width="100%" />
 </p>
 
 # quire-wasm
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/6qsdhSPE)
 
 WebAssembly bindings for [quire-rs](https://github.com/agent-ix/quire-rs) —
 the parsing, extraction, and validation engine that powers the
