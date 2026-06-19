@@ -1,7 +1,6 @@
 {
   "name": "@agent-ix/quire-wasm",
   "version": "0.1.0",
-  "private": true,
   "description": "WebAssembly bindings for quire-rs (parse, extract, validate) — powers spec-editor live preview.",
   "type": "module",
   "main": "pkg/quire_wasm.js",
@@ -14,14 +13,16 @@
     }
   },
   "files": [
-    "pkg/"
+    "pkg/",
+    "LICENSE"
   ],
   "scripts": {
     "build": "wasm-pack build --target web --release",
     "test": "wasm-pack test --node"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",

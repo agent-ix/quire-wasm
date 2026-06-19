@@ -86,3 +86,70 @@ jobs:
       - name: cargo deny check licenses
         working-directory: quire-wasm
         run: cargo deny check licenses
+
+  publish:
+    name: Publish to public npm (Trusted Publishing)
+    # Tag pushes only. Tokenless OIDC — needs no NPM token, just id-token: write.
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [rust, licenses]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: quire-wasm
+
+      - name: Authenticate cargo git fetch (private quire-rs)
+        run: git config --global url."https://x-access-token:${{ secrets.REGISTRY_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: quire-wasm
+
+      - name: Install wasm-pack
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
+      - name: Build wasm package
+        working-directory: quire-wasm
+        run: wasm-pack build --target web --release
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"   # OIDC Trusted Publishing requires Node >= 22.14
+
+      - name: Upgrade npm for Trusted Publishing
+        run: npm install -g npm@latest
+
+      # wasm-pack writes pkg/.gitignore ("*"), which npm honors and would exclude
+      # the entire pkg/ dir from the tarball. Remove it so files:["pkg/"] ships.
+      - name: Ungitignore wasm artifacts
+        working-directory: quire-wasm
+        run: rm -f pkg/.gitignore
+
+      - name: Inject version from tag
+        working-directory: quire-wasm
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg v "$VERSION" '.version=$v' package.json > tmp && mv tmp package.json
+
+      # Public npm via OIDC: route @agent-ix at registry.npmjs.org with no auth
+      # token; `npm publish` performs the tokenless OIDC token exchange.
+      - name: Configure npm for public npm
+        run: printf 'registry=https://registry.npmjs.org/\n@agent-ix:registry=https://registry.npmjs.org/\n' > "$HOME/.npmrc"
+
+      - name: Publish to public npm
+        working-directory: quire-wasm
+        run: npm publish
