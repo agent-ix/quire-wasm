@@ -18,7 +18,7 @@ crate-type = ["cdylib", "rlib"]
 # (no sibling checkout in CI). The default feature set already excludes
 # pyo3 (see quire-rs Cargo.toml `default = []`), so the wasm cdylib
 # compiles without bringing in libpython.
-quire-rs = { git = "https://github.com/agent-ix/quire-rs", tag = "v0.11.0", default-features = false, features = ["wasm"] }
+quire-rs = { git = "https://github.com/agent-ix/quire-rs", branch = "task-9-10-canonical-filament-extraction", default-features = false, features = ["wasm"] }
 
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"
@@ -49,3 +49,6 @@ panic-hook = ["dep:console_error_panic_hook"]
 lto = "thin"
 codegen-units = 1
 opt-level = "s"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

@@ -25,11 +25,14 @@
 
 use std::collections::BTreeMap;
 
+use serde::Serialize;
 use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use quire_rs::{
-    extract as rs_extract, parse_document as rs_parse_document, validate, ExtractionDsl, Registry,
+    extract as rs_extract, extract_filament_core as rs_extract_filament_core,
+    parse_document as rs_parse_document, validate, ExtractionDsl, FilamentExtractionInput,
+    Registry,
 };
 
 /// Install a panic hook that surfaces Rust panics as console.error in JS.
@@ -61,7 +64,8 @@ fn data_from_js(data: JsValue) -> Result<Value, JsError> {
 }
 
 fn value_to_js(value: &Value) -> Result<JsValue, JsError> {
-    serde_wasm_bindgen::to_value(value)
+    value
+        .serialize(&serde_wasm_bindgen::Serializer::json_compatible())
         .map_err(|e| JsError::new(&format!("serialization failed: {e}")))
 }
 
@@ -154,6 +158,42 @@ pub fn validate_from_blob(
 ) -> Result<(), JsError> {
     let registry = registry_from_blob(module_blob)?;
     validate_with_registry(&registry, archetype, data)
+}
+
+/// Run canonical Filament core-data extraction for one markdown document.
+///
+/// Request shape:
+/// ```json
+/// {
+///   "projectId": "project",
+///   "documentId": "doc",
+///   "artifactId": "artifact-or-null",
+///   "relPath": "spec/FR-001.md",
+///   "repoName": "repo",
+///   "markdown": "---\n...",
+///   "objectTypes": [{ "name": "domain", "schema": { "type": "object" } }]
+/// }
+/// ```
+#[wasm_bindgen(js_name = extractFilamentCore)]
+pub fn extract_filament_core(request: JsValue) -> Result<JsValue, JsError> {
+    let input: FilamentExtractionInput = serde_wasm_bindgen::from_value(request)
+        .map_err(|e| JsError::new(&format!("invalid core extraction request: {e}")))?;
+    let result = rs_extract_filament_core(input);
+    let value = serde_json::to_value(result)
+        .map_err(|e| JsError::new(&format!("core extraction serialization failed: {e}")))?;
+    value_to_js(&value)
+}
+
+/// Compatibility alias for hosts that prefer the core-data naming.
+#[wasm_bindgen(js_name = extractCoreData)]
+pub fn extract_core_data(request: JsValue) -> Result<JsValue, JsError> {
+    extract_filament_core(request)
+}
+
+/// Compatibility alias for hosts migrating from parser-lib wording.
+#[wasm_bindgen(js_name = extractCoreDataFromMarkdown)]
+pub fn extract_core_data_from_markdown(request: JsValue) -> Result<JsValue, JsError> {
+    extract_filament_core(request)
 }
 
 // ============================================================================

@@ -15,6 +15,7 @@ help:
 	@echo "  make fmt-check        - Verify formatting (CI gate)"
 	@echo "  make lint             - Clippy with -D warnings"
 	@echo "  make test             - wasm-pack test --node (parity tests)"
+	@echo "  make test-filament    - compare generated WASM extraction with PyO3 quire"
 	@echo "  make build            - wasm-pack build --target web --release"
 	@echo "  make build-node       - wasm-pack build --target nodejs --release"
 	@echo "  make clean            - cargo clean + rm -rf pkg/"
@@ -38,6 +39,10 @@ lint:
 .PHONY: test
 test:
 	QUIRE_WASM_TEST_MODULE_ROOT=$(QUIRE_WASM_TEST_MODULE_ROOT) $(WASM_PACK) test --node
+
+.PHONY: test-filament
+test-filament:
+	node tests/filament_core_parity.mjs
 
 .PHONY: build
 build:
