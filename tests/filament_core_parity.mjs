@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import init, {
@@ -11,111 +12,11 @@ import init, {
 const wasmPath = fileURLToPath(new URL("../pkg/quire_wasm_bg.wasm", import.meta.url));
 await init({ module_or_path: readFileSync(wasmPath) });
 
-const objectTypes = {
-  capability: {
-    name: "capability",
-    schema: { type: "object", additionalProperties: true },
-    allowedLinks: {},
-    bodyExtraction: null,
-    hasPlugin: false,
-    moduleId: null,
-  },
-  endpoint: {
-    name: "endpoint",
-    schema: {
-      type: "object",
-      required: ["method", "target"],
-      properties: {
-        method: { type: "string" },
-        target: { type: "string" },
-      },
-    },
-    allowedLinks: {},
-    bodyExtraction: {
-      yield_pattern: {
-        match: {
-          method: {
-            from: "section_body",
-            after_heading: "Endpoint",
-            regex: "^(GET)",
-            required: true,
-          },
-          target: {
-            from: "section_body",
-            after_heading: "Endpoint",
-            regex: "(/payments)",
-            required: true,
-          },
-        },
-      },
-      emit_edges: [{ type: "serves", target: "ix://agent-ix/example/API" }],
-    },
-    hasPlugin: false,
-    moduleId: null,
-  },
-  plugin: {
-    name: "plugin",
-    schema: { type: "object", additionalProperties: true },
-    allowedLinks: {},
-    bodyExtraction: null,
-    hasPlugin: true,
-    moduleId: null,
-  },
-};
-
-function request(markdown, objectTypesForFixture = [objectTypes.capability]) {
-  return {
-    projectId: "project",
-    documentId: "doc-1",
-    artifactId: "artifact-1",
-    relPath: "spec/FR-001.md",
-    markdown,
-    repoName: "example",
-    objectTypes: objectTypesForFixture,
-  };
-}
-
-const fixtures = [
-  {
-    name: "tier1-frontmatter",
-    request: request(
-      "---\nid: FR-001\ntitle: Pay vendors\nobject: capability\npriority: P0\n---\n# Body\n",
-    ),
-  },
-  {
-    name: "tier2-dsl",
-    request: request(
-      "---\nid: API-001\ntitle: Payments API\nobject: endpoint\n---\n## Endpoint\nGET /payments\n",
-      [objectTypes.endpoint],
-    ),
-  },
-  {
-    name: "unknown-object",
-    request: request("---\nid: FR-001\nobject: missing\n---\n# Body\n"),
-  },
-  {
-    name: "relationship-and-body-links",
-    request: request(
-      "---\nid: FR-001\nobject: capability\ndepends_on:\n  - FR-002\n---\nSee [US-001](ix://agent-ix/example/US-001).\n",
-    ),
-  },
-  {
-    name: "duplicate-edge",
-    request: request(
-      "---\nid: FR-001\nobject: capability\nrelationships:\n  - target: ix://agent-ix/example/FR-002\n    type: references\n---\nSee [FR-002](ix://agent-ix/example/FR-002).\n",
-    ),
-  },
-  {
-    name: "malformed-ix-uri",
-    request: request(
-      "---\nid: FR-001\nobject: capability\nrelationships:\n  - target: ix://agent-ix\n    type: references\n---\n# Body\n",
-    ),
-  },
-  {
-    name: "plugin-error",
-    request: request("---\nid: PLUG-001\nobject: plugin\n---\n# Body\n", [objectTypes.plugin]),
-  },
-];
+const fixturesPath = resolve(
+  fileURLToPath(new URL("..", import.meta.url)),
+  "../quire-rs/tests/fixtures/filament_core/graph_cases.json",
+);
+const fixtures = JSON.parse(readFileSync(fixturesPath, "utf8"));
 
 const python = process.env.QUIRE_PYTHON ?? "python3";
 const pythonCode = `
@@ -147,9 +48,9 @@ function stable(value) {
 }
 
 for (const fixture of fixtures) {
-  const wasm = extractFilamentCore(fixture.request);
+  const wasm = extractFilamentCore(fixture.input);
   const pythonResult = spawnSync(python, ["-c", pythonCode], {
-    input: JSON.stringify(fixture.request),
+    input: JSON.stringify(fixture.input),
     encoding: "utf8",
   });
 
@@ -167,7 +68,7 @@ for (const fixture of fixtures) {
   }
 }
 
-const aliasRequest = fixtures[0].request;
+const aliasRequest = fixtures[0].input;
 if (stable(extractCoreData(aliasRequest)) !== stable(extractFilamentCore(aliasRequest))) {
   throw new Error("extractCoreData alias diverges from extractFilamentCore");
 }
