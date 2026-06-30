@@ -6,8 +6,6 @@ name: Release
 # ever happens from this release.yml (which is what npm Trusted Publishing matches).
 
 on:
-  push:
-    tags: ["v*.*.*"]
   workflow_dispatch:
 
 jobs:
