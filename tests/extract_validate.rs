@@ -142,3 +142,39 @@ fn parse_document_roundtrip() {
         "missing sections in parse output"
     );
 }
+
+#[wasm_bindgen_test]
+fn extract_filament_core_returns_core_data_shape() {
+    use serde::Serialize as _;
+    let request = json!({
+        "projectId": "project",
+        "documentId": "doc-domain",
+        "artifactId": "artifact-domain",
+        "relPath": "spec/Domain.md",
+        "repoName": "filament-ide",
+        "markdown": "---\nid: DOM-001\ntitle: Payments\ntype: FR\nobject: domain\ndepends_on:\n  - ix://agent-ix/filament-ide/FR-001\n---\n\n# Payments\n",
+        "objectTypes": [{
+            "name": "domain",
+            "schema": {"type": "object", "additionalProperties": true},
+            "allowedLinks": {},
+            "bodyExtraction": null,
+            "hasPlugin": false,
+            "moduleId": null
+        }]
+    });
+    let js_request: JsValue = request.serialize(&serializer()).unwrap();
+    let out = quire_wasm::extract_filament_core(js_request).expect("extract core ok");
+    let value: serde_json::Value = serde_wasm_bindgen::from_value(out).unwrap();
+    assert_eq!(value["documentId"], "doc-domain");
+    assert_eq!(value["artifactId"], "artifact-domain");
+    assert_eq!(value["objectTypes"][0]["name"], "domain");
+    assert_eq!(value["nodes"][0]["objectType"], "domain");
+    assert_eq!(
+        value["nodes"][0]["ref"],
+        "ix://agent-ix/filament-ide/Domain"
+    );
+    assert_eq!(
+        value["edges"][0]["targetRef"],
+        "ix://agent-ix/filament-ide/FR-001"
+    );
+}

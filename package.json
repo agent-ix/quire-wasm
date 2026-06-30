@@ -18,7 +18,8 @@
   ],
   "scripts": {
     "build": "wasm-pack build --target web --release",
-    "test": "wasm-pack test --node"
+    "test": "wasm-pack test --node",
+    "test:filament-parity": "node tests/filament_core_parity.mjs"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
