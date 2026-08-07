@@ -23,11 +23,12 @@ guarantees the preview matches the published artifact.
 
 ## Validation Criteria
 
-| ID | Criteria |
-|----|----------|
-| StR-001-AC-1 | For every ISO archetype shipped by `spec-artifacts-iso`, the WASM `render(archetype, moduleRoot, data)` returns a string equal to `quire render <archetype> --module <root> --data <ctx>` for the same context. |
-| StR-001-AC-2 | The WASM `parseDocument(text)` returns a JSON shape equal to `quire-rs::parse_document(text)` serialized via serde_json. |
-| StR-001-AC-3 | The WASM `extract` and `validate_archetype` surfaces honor the same error shape as `quire-rs` (mapped through `JsError` with the `QuireError` Debug payload). |
+
+| ID | Criteria | Validation |
+|----|----------|------------|
+| StR-001-VC-1 | For every ISO archetype shipped by `spec-artifacts-iso`, the WASM `render(archetype, moduleRoot, data)` returns a string equal to `quire render <archetype> --module <root> --data <ctx>` for the same context. | Demonstration |
+| StR-001-VC-2 | The WASM `parseDocument(text)` returns a JSON shape equal to `quire-rs::parse_document(text)` serialized via serde_json. | Demonstration |
+| StR-001-VC-3 | The WASM `extract` and `validate_archetype` surfaces honor the same error shape as `quire-rs` (mapped through `JsError` with the `QuireError` Debug payload). | Demonstration |
 
 ## Dependencies
 
