@@ -5,7 +5,7 @@ edition = "2021"
 rust-version = "1.75"
 description = "WebAssembly bindings for quire-rs (parse, extract, validate) — powers spec-editor live preview."
 authors = ["Agent IX <kreneskyp@gmail.com>"]
-license = "AGPL-3.0-only"
+license = "AGPL-3.0-or-later"
 repository = "https://github.com/agent-ix/quire-wasm"
 
 [lib]
