@@ -1,6 +1,10 @@
-/target
 /pkg
 Cargo.lock
 node_modules/
 *.tgz
 .DS_Store
+
+target/
+*-target/
+target-*/
+.worktrees/
