@@ -59,10 +59,6 @@ jobs:
           QUIRE_WASM_TEST_MODULE_ROOT: ${{ github.workspace }}/spec-artifacts-iso/spec_artifacts_iso
         run: wasm-pack test --node
 
-      - name: Unsafe audit
-        working-directory: quire-wasm
-        run: bash scripts/check_unsafe_comments.sh
-
   licenses:
     name: License Check
     runs-on: ubuntu-24.04

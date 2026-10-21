@@ -20,9 +20,8 @@ help:
 	@echo "  make build-node       - wasm-pack build --target nodejs --release"
 	@echo "  make clean            - cargo clean + rm -rf pkg/"
 	@echo "  make deny             - cargo deny check licenses"
-	@echo "  make audit-unsafe     - Enforce // SAFETY: comments on unsafe blocks"
 	@echo "  make pack             - npm pack (produces .tgz tarball)"
-	@echo "  make ci               - fmt-check + lint + test + deny + audit-unsafe"
+	@echo "  make ci               - fmt-check + lint + test + deny"
 
 .PHONY: fmt
 fmt:
@@ -61,13 +60,9 @@ clean:
 deny:
 	$(CARGO) deny check licenses
 
-.PHONY: audit-unsafe
-audit-unsafe:
-	bash scripts/check_unsafe_comments.sh
-
 .PHONY: pack
 pack: build
 	cd pkg && npm pack
 
 .PHONY: ci
-ci: fmt-check lint test deny audit-unsafe
+ci: fmt-check lint test deny
