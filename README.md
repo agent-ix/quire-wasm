@@ -78,3 +78,5 @@ make ci          # full local CI gate (fmt + lint + test + deny + audit)
 ## License
 
 MIT
+
+<!-- STD-30 language-boundary canary: inert README change. -->
