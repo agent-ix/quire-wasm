@@ -32,3 +32,5 @@ type: TestMatrix
 | FR-004-AC-2  | validate_from_blob_rejects_missing_required | tests/extract_validate.rs | green |
 | NFR-001-AC-1 | (render budget) | — | RETIRED (CR-001) |
 | NFR-001-AC-2 | (render budget) | — | RETIRED (CR-001) |
+| FR-005-AC-1  | extract_semantic_matches_quire_rs_for_every_case | tests/semantic_parity.rs | green |
+| FR-005-AC-2  | unsupported_contract_version_is_refused | tests/semantic_parity.rs | green |

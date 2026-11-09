@@ -31,8 +31,8 @@ use wasm_bindgen::prelude::*;
 
 use quire_rs::{
     extract as rs_extract, extract_filament_core as rs_extract_filament_core,
-    parse_document as rs_parse_document, validate, ExtractionDsl, FilamentExtractionInput,
-    Registry,
+    parse_document as rs_parse_document, semantic::python_entry::extract_semantic_json, validate,
+    ExtractionDsl, FilamentExtractionInput, Registry,
 };
 
 /// Install a panic hook that surfaces Rust panics as console.error in JS.
@@ -194,6 +194,30 @@ pub fn extract_core_data(request: JsValue) -> Result<JsValue, JsError> {
 #[wasm_bindgen(js_name = extractCoreDataFromMarkdown)]
 pub fn extract_core_data_from_markdown(request: JsValue) -> Result<JsValue, JsError> {
     extract_filament_core(request)
+}
+
+/// Run FR-072 semantic extraction for one markdown document and return the
+/// `semantic-v1` record.
+///
+/// The request is the shared binding request of quire-rs
+/// (`markdown`, `module`, and the optional `path`, `sourceIdentity`, `scope`,
+/// `bundle`, `required`, `bodyExtraction`, `relationVocabulary`,
+/// `constructReferences`, `dataSchema`). A module whose `contractVersion` is
+/// not the supported one is refused: the call throws a `JsError` whose
+/// message starts with `semantic.unsupported-contract-version`.
+#[wasm_bindgen(js_name = extractSemantic)]
+pub fn extract_semantic(request: JsValue) -> Result<JsValue, JsError> {
+    let request: Value = serde_wasm_bindgen::from_value(request)
+        .map_err(|e| JsError::new(&format!("invalid semantic extraction request: {e}")))?;
+    let record = semantic_record(&request).map_err(|e| JsError::new(&e))?;
+    value_to_js(&record)
+}
+
+/// The host-independent core of [`extract_semantic`].
+pub fn semantic_record(request: &Value) -> Result<Value, String> {
+    let extraction = extract_semantic_json(request)?;
+    serde_json::to_value(extraction)
+        .map_err(|e| format!("semantic extraction serialization failed: {e}"))
 }
 
 // ============================================================================

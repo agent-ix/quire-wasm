@@ -2,7 +2,7 @@
 name = "quire-wasm"
 version = "0.3.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.98.1"
 description = "WebAssembly bindings for quire-rs (parse, extract, validate) — powers spec-editor live preview."
 authors = ["Agent IX <kreneskyp@gmail.com>"]
 license = "AGPL-3.0-or-later"
@@ -22,11 +22,11 @@ path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# Pinned to a published quire-rs git tag so cargo fetches it directly
-# (no sibling checkout in CI). The default feature set already excludes
-# pyo3 (see quire-rs Cargo.toml `default = []`), so the wasm cdylib
-# compiles without bringing in libpython.
-quire-rs = { git = "https://github.com/agent-ix/quire-rs", branch = "task-9-10-canonical-filament-extraction", default-features = false, features = ["wasm"] }
+# Fetched from quire-rs main so cargo needs no sibling checkout. Default
+# features are off: they carry the tree-sitter symbol adapters and filesystem
+# `$ref` resolution, neither of which builds for wasm32; `wasm` selects the
+# filesystem-free build.
+quire-rs = { git = "https://github.com/agent-ix/quire-rs", branch = "main", default-features = false, features = ["wasm"] }
 
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"
