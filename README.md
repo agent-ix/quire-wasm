@@ -24,8 +24,6 @@ byte-for-byte with the `quire` CLI and the Python reference parser.
 ```ts
 import init, {
   parseDocument,
-  extract,
-  validate_archetype as validate,
   extractFromBlob,
   validateFromBlob,
 } from "@agent-ix/quire-wasm";
@@ -33,10 +31,6 @@ import init, {
 await init(); // load the .wasm
 
 const doc = parseDocument(md);
-
-// Filesystem-rooted (Node target):
-const records = extract("FR", "/path/to/module", md);
-validate("FR", "/path/to/module", { id: "FR-001", /* ... */ }); // throws on violation
 
 // In-memory module blob (browser / --target web):
 const moduleBlob = {
@@ -54,8 +48,10 @@ validateFromBlob("FR", moduleBlob, { id: "FR-001", /* ... */ });
   used by `--target web`. Builds an inline `Registry` via
   `quire_rs::Registry::from_inline_parts(manifest, schemas)`.
 - **Filesystem-rooted** (`extract`, `validate_archetype`): pass a
-  `moduleRoot` path string. Works under `wasm-pack --target nodejs`
-  (real fs) and any embedding that polyfills `fs` via WASI.
+  `moduleRoot` path string. These functions require a locally built
+  `--target nodejs` package; the published npm package is built with
+  `--target web`, where filesystem-rooted module paths are unsupported. Use
+  the module-blob functions with the published package.
 
 `parseDocument` is filesystem-free and works everywhere.
 
